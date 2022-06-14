@@ -6,8 +6,8 @@ header-includes:
   \usepackage{fvextra}
   \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
 output:
-  pdf_document: default
   html_document: default
+  pdf_document: default
 ---
 <style type="text/css">
 
