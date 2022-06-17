@@ -1,6 +1,6 @@
 ---
 title: "IDS — Assignment 1"
-author: "Albin Lindqvist (13986236)"
+author: "Albin Lindqvist (13986236), Zeynep Mersinlioğlu (13616145)"
 date: "`r Sys.Date()`"
 header-includes:
   \usepackage{fvextra}
@@ -28,6 +28,15 @@ h4.date {
 library(ggplot2)
 Data=data.matrix(read.table("InterestRates.txt", header=FALSE))
 # head(Data)
-ggplot(as.data.frame(t(Data)),aes(x=1:length(Data[1,]))) + geom_line(aes(y=V1, col="January 2002")) + geom_line(aes(y=V250, col="January 2003")) + geom_line(aes(y=V500,col="January 2004")) + geom_line(aes(y=V750, col="January 2005"))  + geom_line(aes(y=V1000, col="January 2006")) + labs(x="maturity",y="YTM",title="YTM curves",col="")
+ggplot(as.data.frame(t(Data)),aes(x=1:length(Data[1,]))) + geom_line(aes(y=V1, col="January 2002")) + geom_line(aes(y=V250, col="January 2003")) + geom_line(aes(y=V500,col="January 2004")) + geom_line(aes(y=V750, col="January 2005"))  + geom_line(aes(y=V1250, col="January 2007")) + labs(x="maturity",y="YTM",title="YTM curves",col="")
 ```
 
+The dates on the legend are approximations based on the following calculation: $\frac{1264}{5}=252.8$ so, each year has on average $252.8 \approx 250$ observations.
+
+# Question 2
+
+# Question 3
+
+# Question 4
+
+# Question 5
