@@ -1,13 +1,13 @@
 ---
 title: "IDS — Assignment 1"
-author: "Albin Lindqvist (13986236)"
+author: "Albin Lindqvist (13986236), Zeynep Mersinlioğlu (13616145)"
 date: "`r Sys.Date()`"
 header-includes:
   \usepackage{fvextra}
   \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
 output:
-  html_document: default
   pdf_document: default
+  html_document: default
 ---
 <style type="text/css">
 
@@ -80,7 +80,7 @@ summary(Data$x.p)
 
 We can clearly see that there are some very extreme values of `x.p`, and we need to zoom in a lot to see the box-plot and the histograms properties. We can see that a lot of the values are below $5$, but still quite a lot of values are above it. The standard deviation is around $2.6$ but there are values which are more than 20 times the standard deviation plus the mean, so they are inadequate to describe the data accurately. We can also note that the distribution is not symmetric, there are, for example, no values that are below 1, which is logical because the support of `x.p` is $[1,\infty)$.
 
-If we look at the range of the sample of `x.p` we will see that it is $159.275-1=158.275$, whilst the IQR is $1.992-1.154=0.838$ the difference is staggering, we can thus see that the mean and the standard deviation does bring the characteristics of the distribution.
+If we look at the range of the sample of `x.p` we will see that it is $159.275-1=158.275$, whilst the IQR is $1.992-1.154=0.838$ the difference is staggering, we can thus see that the mean and the standard deviation does not show the characteristics of the distribution.
 
 # Question 2
 
@@ -95,11 +95,12 @@ As we can see we have some entries that are not a number ('NaN'), this means tha
 
 ```{r}
 (idx_na_data2_log = which(is.na(Data2_log)))
+(Data2$V1[416])
 cleaned = Data2_log$V1[-idx_na_data2_log]
 Data2_log_clean <- data.frame(cleaned)
 ```
 
-We found out that it was only one value that became 'Nan', so we can relatively safely remove it without altering the data too much. We also confirm that it is indeed gone. We will now plot the log transformed data
+We found out that it was only one value that became 'NaN', and it is indeed negative. Since it is only one value that are below 0, we can relatively safely remove it without altering the data too much. We can also confirm that it is indeed gone. We will now plot the log transformed data
 
 ```{r}
 log_histo <- ggplot(Data2_log_clean, aes(x=cleaned)) + geom_histogram(bins=50, fill="black", col="grey")
@@ -134,7 +135,7 @@ We also have a negative value, which we found in 2.1. It is reasonable to delete
 Data2_clean = subset(Data2, V1 >= 0 & V1 < 1000)
 ```
 
-We will also investigate how the z-score-method would perform. Given that the contains, a few, observations that are not unreasonable, but much larger than others, it might make more sense to use the z-score.
+We will also investigate how the z-score-method would perform. Given that the data contains a few observations that are not unreasonable, but much larger than others, it might make more sense to use the z-score instead of the IQR-method.
 ```{r}
 Data2_clean$z_score <- (Data2_clean$V1 - mean(Data2_clean$V1))/sd(Data2_clean$V1)
 Data2_z_score_outliers = subset(Data2_clean, z_score <= 3)
@@ -151,7 +152,7 @@ It is easily observed that the z-score-method keeps a more appropriate amount of
 summary(Data2_clean$V1)
 summary(Data2_z_score_outliers$V1)
 ```
-It can be seen that in the "original" (without extreme outliers) dataset there is a difference between the mean and median. This of course has to do with the behavior of these two methods. Much of the data is indeed close to 2, which the median indicate. However, we have a quite large spread towards the right tail, which can be observed in the mean, that is over $3$ times higher than the median.
+It can be seen that in the "original" (still excluding negative and $>4000$ values) dataset there is a difference between the mean and median. This of course has to do with the behavior of these two methods. Much of the data is indeed close to 2, which the median indicate. However, we have a quite large spread towards the right tail, which can be observed in the mean, that is over $3$ times higher than the median.
 Looking at the cleaned data (removing outliers with z-score-method) the median is almost the same as in the "original" data. There is however, a difference in the mean. The cleaned data is now just $2$ times higher than the median. This is expected given that we removed some of the outliers, so the mean changes significantly.
 
 
@@ -163,11 +164,11 @@ rolling_median <- data.frame(sapply(1:length(Data2_clean$V1), function(i)median(
 
 colnames(rolling_mean) <- c("V1")
 colnames(rolling_median) <- c("V1")
-ggplot() + geom_line(data=rolling_mean, mapping=aes(x=1:length(V1),y=V1,colour="red")) + geom_line(data=rolling_median, mapping=aes(x=1:length(V1),y=V1,colour="blue")) + geom_point(data=Data2_clean, aes(x=1:length(V1),y=V1, colour="green"), alpha=0.2) + labs(x="Day",y="Claims (log10)",title = "All data except extreme outliers", colour="Type") + scale_colour_hue(labels=c("median", "observation", "mean")) + scale_y_log10()
+ggplot() + geom_line(data=rolling_mean, mapping=aes(x=1:length(V1),y=V1,colour="mean")) + geom_line(data=rolling_median, mapping=aes(x=1:length(V1),y=V1,colour="median")) + geom_point(data=Data2_clean, aes(x=1:length(V1),y=V1, colour="observation"), alpha=0.2) + labs(x="Day",y="Claims (log10)",title = "All data except extreme outliers", colour="Type") + scale_y_log10()
 
 ```
 
-These plots shows the clean data (only removing the two extreme outliers), and the rolling mean (red) and median (blue). We use a logarithmic y-axis to be able to represent some of the larger observations. One can note a larger discrepancy between the median and mean and it can be seen that the median stabilizes much quicker than the mean, something we will bear in mind.
+These plots shows the clean data (only removing the two extreme outliers), and the rolling mean (blue) and median (red). We use a logarithmic y-axis to be able to represent some of the larger observations. One can note a larger discrepancy between the median and mean and it can be seen that the median stabilizes much quicker than the mean, something we will bear in mind.
 
 ```{r}
 rolling_mean <- data.frame(sapply(1:length(Data2_z_score_outliers$V1), function(i)mean(Data2_z_score_outliers$V1[1:i])))
@@ -177,9 +178,9 @@ rolling_median <- data.frame(sapply(1:length(Data2_z_score_outliers$V1), functio
 colnames(rolling_mean) <- c("V1")
 colnames(rolling_median) <- c("V1")
 
-ggplot()+geom_line(data=rolling_mean, mapping=aes(x=1:length(V1),y=V1,colour="red")) + geom_line(data=rolling_median, mapping=aes(x=1:length(V1),y=V1,colour="blue")) + geom_point(data=Data2_z_score_outliers, aes(x=1:length(V1),y=V1, colour="green"),alpha=0.2) + labs(x="Day",y="Claims (log10)",title = "Outliers removed via z-score-method", colour="Type") + scale_colour_hue(labels=c("median", "observation", "mean"))+ scale_y_log10()
+ggplot()+geom_line(data=rolling_mean, mapping=aes(x=1:length(V1),y=V1,colour="mean")) + geom_line(data=rolling_median, mapping=aes(x=1:length(V1),y=V1,colour="median")) + geom_point(data=Data2_z_score_outliers, aes(x=1:length(V1),y=V1, colour="observation"),alpha=0.2) + labs(x="Day",y="Claims (log10)",title = "Outliers removed via z-score-method", colour="Type") + scale_y_log10()
 ```
 
-In this graph, which also have a $\log_{10}$ y-axis, this dataset is a bit smaller and disregards all observations not contained in range $[-3,3]$. One can see that the mean and median, in principle, stabilizes at the same time. As a matter of fact the mean appear to be more stable than the median in the beginning, something we did not notice in the previous graph.
+In this graph, which also have a $\log_{10}$ y-axis, the dataset is a bit smaller and disregards all observations not contained in range $[-3,3]$. One can see that the mean and median, in principle, stabilizes at the same time. As a matter of fact the mean appear to be more stable than the median in the beginning, something we did not notice in the previous graph.
 
-With these remarks in mind we can start to summarize which method and which measure is preferred. The median appears to be the best when considering both scenarios. When having almost all the data still in use it is still a good measure on the claim amounts. The median tells us that half of it is above, and the other is below this value. However, it does not clearly reflect days where there is a larger claim amount.
+With these remarks in mind we can start to summarize which method and which measure is preferred. The median appears to be the best when considering both scenarios. When having almost all the data still in use it is still a good measure on the claim amounts. The median tells us that half of it is above, and the other is below this value. However, the median does not clearly reflect days where there is a larger claim amount, but it is the most stable with and without outliers.
