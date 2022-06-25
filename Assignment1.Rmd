@@ -159,11 +159,17 @@ Looking at the cleaned data (removing outliers with z-score-method) the median i
 ## 2.4
 ```{r}
 rolling_mean <- data.frame(sapply(1:length(Data2_clean$V1), function(i)mean(Data2_clean$V1[1:i])))
+# Another method that includes cumsum method.
+rolling_mean$pre = cumsum(Data2_clean$V1)
+rolling_mean$V2 = sapply(1:length(rolling_mean$pre), function(i)rolling_mean$pre[i]/i)
+
+# Checking that the two methods gives the same answer
+colnames(rolling_mean) <- c("V1", "pre", "V2")
+head(rolling_mean)
 
 rolling_median <- data.frame(sapply(1:length(Data2_clean$V1), function(i)median(Data2_clean$V1[1:i])))
 
-colnames(rolling_mean) <- c("V1")
-colnames(rolling_median) <- c("V1")
+colnames(rolling_median) <- "V1"
 ggplot() + geom_line(data=rolling_mean, mapping=aes(x=1:length(V1),y=V1,colour="mean")) + geom_line(data=rolling_median, mapping=aes(x=1:length(V1),y=V1,colour="median")) + geom_point(data=Data2_clean, aes(x=1:length(V1),y=V1, colour="observation"), alpha=0.2) + labs(x="Day",y="Claims (log10)",title = "All data except extreme outliers", colour="Type") + scale_y_log10()
 
 ```
